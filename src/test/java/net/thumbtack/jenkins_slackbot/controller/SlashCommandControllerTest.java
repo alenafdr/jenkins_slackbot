@@ -1,6 +1,6 @@
 package net.thumbtack.jenkins_slackbot.controller;
 
-import net.thumbtack.jenkins_slackbot.service.SlashCommandService;
+import net.thumbtack.jenkins_slackbot.service.SlashCommandsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebMvcTest(value = SlashCommandsController.class, secure = false)
-@ContextConfiguration(classes = {SlashCommandsController.class, SlashCommandService.class})
+@ContextConfiguration(classes = {SlashCommandsController.class, SlashCommandsService.class})
 public class SlashCommandControllerTest {
     Logger LOGGER = LoggerFactory.getLogger(SlashCommandControllerTest.class);
     @Autowired

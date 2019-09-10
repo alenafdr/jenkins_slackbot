@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class JenkinsDao {
@@ -30,6 +31,16 @@ public class JenkinsDao {
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
             return new HashMap<>();
+        }
+    }
+
+    public Optional<Job> findByName(String name) {
+        try {
+            JenkinsServer jenkins = new JenkinsServer(new URI(host), login, password);
+            return Optional.of(jenkins.getJob(name));
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 }

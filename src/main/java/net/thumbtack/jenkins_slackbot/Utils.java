@@ -2,6 +2,8 @@ package net.thumbtack.jenkins_slackbot;
 
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
+import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
+import com.github.seratch.jslack.api.model.block.element.ButtonElement;
 import com.opencsv.CSVReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,14 @@ public class Utils {
     public static SectionBlock buildSectionBlockWithText(String text) {
         return SectionBlock.builder()
                 .text(MarkdownTextObject.builder().text(text).build())
+                .build();
+    }
+
+    public static ButtonElement buildButtonWithParams(String text, String value, String style) {
+        return ButtonElement.builder()
+                .text(PlainTextObject.builder().text(text).build())
+                .value(value)
+                .style(style)
                 .build();
     }
 

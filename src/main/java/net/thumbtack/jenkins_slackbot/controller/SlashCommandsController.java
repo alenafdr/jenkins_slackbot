@@ -2,7 +2,7 @@ package net.thumbtack.jenkins_slackbot.controller;
 
 import com.github.seratch.jslack.app_backend.interactive_messages.response.ActionResponse;
 import net.thumbtack.jenkins_slackbot.service.InteractionsService;
-import net.thumbtack.jenkins_slackbot.service.SlashCommandService;
+import net.thumbtack.jenkins_slackbot.service.SlashCommandsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class SlashCommandsController {
 
     private static final Logger log = LoggerFactory.getLogger(SlashCommandsController.class);
-    private SlashCommandService slashCommandService;
+    private SlashCommandsService slashCommandsService;
     private InteractionsService interactionsService;
 
 
 
     @Autowired
-    public SlashCommandsController(SlashCommandService slashCommandService, InteractionsService interactionsService) {
-        this.slashCommandService = slashCommandService;
+    public SlashCommandsController(SlashCommandsService slashCommandsService, InteractionsService interactionsService) {
+        this.slashCommandsService = slashCommandsService;
         this.interactionsService = interactionsService;
     }
 
@@ -34,7 +34,7 @@ public class SlashCommandsController {
     )
     public ActionResponse mainMenu(String slashCommandPayload) {
         log.info("slackSlashCommand: {}", slashCommandPayload);
-        return slashCommandService.buildMenu();
+        return slashCommandsService.buildMenu();
     }
 
 
