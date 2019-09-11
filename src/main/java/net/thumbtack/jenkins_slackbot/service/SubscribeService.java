@@ -34,7 +34,7 @@ public class SubscribeService {
     void addSubscribe(User user, String jobName) {
         User newUser = getOrCreate(user);
         JenkinsJob jenkinsJob = jenkinsJobRepository.findByName(jobName)
-                .orElse(jenkinsJobRepository.save(
+                .orElseGet(() -> jenkinsJobRepository.save(
                         new JenkinsJob(jenkinsDao.findByName(jobName)
                                 .orElseThrow(() -> new RuntimeException("There is no job with name " + jobName)))));
         newUser.getSubscriptions().add(jenkinsJob);
@@ -63,7 +63,7 @@ public class SubscribeService {
         userRepository.save(newUser);
     }
 
-    private User getOrCreate(User user){
+    private User getOrCreate(User user) {
         return userRepository.findById(user.getId()).orElseGet(() -> userRepository.save(user));
     }
 }

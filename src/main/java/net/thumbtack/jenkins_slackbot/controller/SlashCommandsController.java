@@ -19,8 +19,6 @@ public class SlashCommandsController {
     private SlashCommandsService slashCommandsService;
     private InteractionsService interactionsService;
 
-
-
     @Autowired
     public SlashCommandsController(SlashCommandsService slashCommandsService, InteractionsService interactionsService) {
         this.slashCommandsService = slashCommandsService;
@@ -36,7 +34,4 @@ public class SlashCommandsController {
         log.info("slackSlashCommand: {}", slashCommandPayload);
         return slashCommandsService.buildMenu();
     }
-
-
-
 }

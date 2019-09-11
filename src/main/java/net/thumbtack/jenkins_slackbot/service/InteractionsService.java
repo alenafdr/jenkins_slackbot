@@ -46,11 +46,11 @@ public class InteractionsService {
 
         mapFunctions = new HashMap<>();
 
-        mapFunctions.put("buttonValueAll", (user, jobName) -> getFullList(user));
-        mapFunctions.put("buttonValueSubscribes", (user, jobName) -> getSubscribes(user));
-        mapFunctions.put("buttonValueUpdate", (user, jobName) -> update(user));
-        mapFunctions.put(".+:Subscribe", this::subscribe);
-        mapFunctions.put(".+:Unsubscribe", this::unsubscribe);
+        mapFunctions.put("buttonValueAll", (user, source) -> getFullList(user));
+        mapFunctions.put("buttonValueSubscriptions", (user, source) -> getSubscribes(user));
+        mapFunctions.put("buttonValueUpdate", (user, source) -> update(user));
+        mapFunctions.put("(.+):Subscribe:(.+)", this::subscribe);
+        mapFunctions.put("(.+):Unsubscribe:(.+)", this::unsubscribe);
     }
 
     /**
@@ -66,30 +66,23 @@ public class InteractionsService {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Action list is empty"));
-        String jobName = getJobName(firstAction);
-        List<LayoutBlock> answer = apply(firstAction.getValue(), new User(payload.getUser()), jobName);
+        List<LayoutBlock> answer = apply(firstAction.getValue(), new User(payload.getUser()));
         slack.send(payload.getResponseUrl(), Payload.builder().blocks(answer).build());
     }
 
-    private List<LayoutBlock> apply(String value, User user, String jobName) {
+    private List<LayoutBlock> apply(String value, User user) {
         for (Map.Entry<String, BiFunction<User, String, List<LayoutBlock>>> functionMap : mapFunctions.entrySet()) {
             if (Pattern.compile(functionMap.getKey()).matcher(value).matches()) {
-                return functionMap.getValue().apply(user, jobName);
+                return functionMap.getValue().apply(user, value);
             }
         }
 
         throw new IllegalArgumentException("There isn't handler for " + value);
     }
 
-    private String getJobName(BlockActionPayload.Action action) {
-        Pattern pattern = Pattern.compile("(.+):(Subscribe|Unsubscribe)");
-        Matcher matcher = pattern.matcher(action.getValue());
-        return (matcher.find()) ? matcher.group(1) : null;
-    }
-
     private List<LayoutBlock> getFullList(User user) {
         try {
-            return buildResponseWithJobListForUser(jenkinsDao.selectJobs().keySet(), user);
+            return buildResponseWithJobListForUser(jenkinsDao.selectJobs().keySet(), user, ":FullList");
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -97,7 +90,17 @@ public class InteractionsService {
     }
 
     private List<LayoutBlock> getSubscribes(User user) {
-        return null;
+        try {
+            return buildResponseWithJobListForUser(
+                    subscribeService.getSubscriptionsByUser(user)
+                            .stream()
+                            .map(JenkinsJob::getName)
+                            .collect(Collectors.toSet()),
+                    user,":Subscriptions");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return getFullList(user);
+        }
     }
 
     private List<LayoutBlock> update(User user) {
@@ -105,17 +108,21 @@ public class InteractionsService {
         return getFullList(user);
     }
 
-    private List<LayoutBlock> subscribe(User user, String jobName) {
+    private List<LayoutBlock> subscribe(User user, String value) {
+        String jobName = getJobName(value);
+        log.info("job name {}", jobName);
         subscribeService.addSubscribe(user, jobName);
-        return getFullList(user);
+        return lastKnownList(value, user);
     }
 
-    private List<LayoutBlock> unsubscribe(User user, String jobName) {
-        subscribeService.removeSubscribe(user,jobName);
-        return getFullList(user);
+    private List<LayoutBlock> unsubscribe(User user, String value) {
+        String jobName = getJobName(value);
+        log.info("job name {}", jobName);
+        subscribeService.removeSubscribe(user, jobName);
+        return lastKnownList(value, user);
     }
 
-    private List<LayoutBlock> buildResponseWithJobListForUser(Set<String> jobs, User user) {
+    private List<LayoutBlock> buildResponseWithJobListForUser(Set<String> jobs, User user, String lastKnownList) {
         Set<String> subscriptions = subscribeService.getSubscriptionsByUser(user)
                 .stream()
                 .map(JenkinsJob::getName)
@@ -124,9 +131,26 @@ public class InteractionsService {
                 SectionBlock.builder()
                         .text(MarkdownTextObject.builder().text(jobName).build())
                         .accessory(subscriptions.contains(jobName) ?
-                                Utils.buildButtonWithParams("Unsubscribe", jobName.concat(":Unsubscribe"), "danger") :
-                                Utils.buildButtonWithParams("Subscribe", jobName.concat(":Subscribe"), "primary"))
+                                Utils.buildButtonWithParams("Unsubscribe", jobName.concat(":Unsubscribe").concat(lastKnownList), "danger") :
+                                Utils.buildButtonWithParams("Subscribe", jobName.concat(":Subscribe").concat(lastKnownList), "primary"))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    private String getJobName(String source) {
+        Pattern pattern = Pattern.compile("(.+):(.+):(.+)");
+        Matcher matcher = pattern.matcher(source);
+        return (matcher.find()) ? matcher.group(1) : null;
+    }
+
+    private List<LayoutBlock> lastKnownList(String source, User user) {
+        Pattern pattern = Pattern.compile("(.+):(.+):(.+)");
+        Matcher matcher = pattern.matcher(source);
+        String value = (matcher.find()) ? matcher.group(3) : null;
+        if ("Subscriptions".equals(value)) {
+            return getSubscribes(user);
+        } else {
+            return getFullList(user);
+        }
     }
 }

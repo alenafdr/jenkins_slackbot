@@ -29,8 +29,8 @@ public class SlashCommandsService {
                 .accessory(Utils.buildButtonWithParams("Get all", "buttonValueAll", null))
                 .build();
         SectionBlock sectionSubscribes = SectionBlock.builder()
-                .text(MarkdownTextObject.builder().text("Get a list of subscribed").build())
-                .accessory(Utils.buildButtonWithParams("Get subscribes", "buttonValueSubscribes", null))
+                .text(MarkdownTextObject.builder().text("Get a list of subscriptions").build())
+                .accessory(Utils.buildButtonWithParams("Get subscription", "buttonValueSubscriptions", null))
                 .build();
         SectionBlock sectionUpdateList = SectionBlock.builder()
                 .text(MarkdownTextObject.builder().text("Update list of jobs").build())
