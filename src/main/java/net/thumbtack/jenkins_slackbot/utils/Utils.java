@@ -1,4 +1,4 @@
-package net.thumbtack.jenkins_slackbot;
+package net.thumbtack.jenkins_slackbot.utils;
 
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;

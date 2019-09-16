@@ -4,9 +4,14 @@ import com.offbytwo.jenkins.model.Job;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -24,6 +29,18 @@ public class JenkinsJob {
 
     @Column(name = "full_name")
     private String fullName;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "subscriptions",
+            joinColumns = @JoinColumn(name = "jenkins_job_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<User> subscribers;
+
+    private int lastKnownBuild;
+
+    public JenkinsJob(List<User> subscribers) {
+        this.subscribers = subscribers;
+    }
 
     public JenkinsJob() {
     }
@@ -74,6 +91,22 @@ public class JenkinsJob {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public List<User> getSubscribers() {
+        return subscribers;
+    }
+
+    public void setSubscribers(List<User> subscribers) {
+        this.subscribers = subscribers;
+    }
+
+    public int getLastKnownBuild() {
+        return lastKnownBuild;
+    }
+
+    public void setLastKnownBuild(int lastKnownBuild) {
+        this.lastKnownBuild = lastKnownBuild;
     }
 
     @Override

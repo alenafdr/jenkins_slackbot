@@ -28,6 +28,8 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "jenkins_job_id"))
     private Set<JenkinsJob> subscriptions;
 
+    private String privateChannelId;
+
     public User() {
     }
 
@@ -59,5 +61,13 @@ public class User {
 
     public void setSubscriptions(Set<JenkinsJob> subscriptions) {
         this.subscriptions = subscriptions;
+    }
+
+    public String getPrivateChannelId() {
+        return privateChannelId;
+    }
+
+    public void setPrivateChannelId(String privateChannelId) {
+        this.privateChannelId = privateChannelId;
     }
 }

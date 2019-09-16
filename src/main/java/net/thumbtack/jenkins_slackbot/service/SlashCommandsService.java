@@ -4,7 +4,7 @@ import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
 import com.github.seratch.jslack.app_backend.interactive_messages.response.ActionResponse;
-import net.thumbtack.jenkins_slackbot.Utils;
+import net.thumbtack.jenkins_slackbot.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

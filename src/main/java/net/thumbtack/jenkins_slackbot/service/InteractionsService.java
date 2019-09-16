@@ -1,17 +1,15 @@
 package net.thumbtack.jenkins_slackbot.service;
 
-import com.github.seratch.jslack.Slack;
 import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
-import com.github.seratch.jslack.api.webhook.Payload;
 import com.github.seratch.jslack.app_backend.interactive_messages.payload.BlockActionPayload;
 import com.github.seratch.jslack.common.json.GsonFactory;
 import com.google.gson.Gson;
-import net.thumbtack.jenkins_slackbot.Utils;
 import net.thumbtack.jenkins_slackbot.dao.JenkinsDao;
 import net.thumbtack.jenkins_slackbot.model.JenkinsJob;
 import net.thumbtack.jenkins_slackbot.model.User;
+import net.thumbtack.jenkins_slackbot.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +32,15 @@ public class InteractionsService {
     private static final Logger log = LoggerFactory.getLogger(InteractionsService.class);
     private JenkinsDao jenkinsDao;
     private SubscribeService subscribeService;
-    private Slack slack;
+    private MessageService messageService;
 
     private final Map<String, BiFunction<User, String, List<LayoutBlock>>> mapFunctions;
 
     @Autowired
-    public InteractionsService(JenkinsDao jenkinsDao, SubscribeService subscribeService) {
+    public InteractionsService(JenkinsDao jenkinsDao, SubscribeService subscribeService, MessageService messageService) {
         this.jenkinsDao = jenkinsDao;
         this.subscribeService = subscribeService;
-        this.slack = Slack.getInstance();
+        this.messageService = messageService;
 
         mapFunctions = new HashMap<>();
 
@@ -55,7 +53,6 @@ public class InteractionsService {
 
     /**
      * @param json json source as string
-     * @throws IOException method {@link Slack#send} can throw {@link java.io.IOException}
      */
     public void handleActionBlock(String json) throws IOException {
         Gson gson = GsonFactory.createSnakeCase();
@@ -67,7 +64,7 @@ public class InteractionsService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Action list is empty"));
         List<LayoutBlock> answer = apply(firstAction.getValue(), new User(payload.getUser()));
-        slack.send(payload.getResponseUrl(), Payload.builder().blocks(answer).build());
+        messageService.sendMessage(payload.getResponseUrl(), answer);
     }
 
     private List<LayoutBlock> apply(String value, User user) {
