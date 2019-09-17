@@ -45,8 +45,6 @@ public class MessageService {
         String channelId = Optional.ofNullable(user.getPrivateChannelId())
                 .orElseGet(() -> getAndUpdateChannelId(user));
         slack.methods(botToken).chatPostMessage(req -> req.channel(channelId).blocks(answer));
-        log.info("Message for user {} is not sent.", user.getName());
-
     }
 
     public String getChannelIdByUserId(String id) throws IOException, SlackApiException {

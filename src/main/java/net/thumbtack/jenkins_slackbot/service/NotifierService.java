@@ -1,5 +1,6 @@
 package net.thumbtack.jenkins_slackbot.service;
 
+import com.github.seratch.jslack.api.methods.SlackApiException;
 import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,13 @@ public class NotifierService {
                     .orElseGet(() -> new JenkinsJob(Collections.emptyList()))
                     .getSubscribers();
             subscribers.forEach(user -> {
-                messageService.sendToUser(buildMessageWithStatus(builds, jobName), user);
+                try {
+                    messageService.sendToUser(buildMessageWithStatus(builds, jobName), user);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (SlackApiException e) {
+                    e.printStackTrace();
+                }
             });
         }
     }
